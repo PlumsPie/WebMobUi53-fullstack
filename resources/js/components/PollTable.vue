@@ -1,11 +1,27 @@
 <script setup>
   import { usePollStore } from '@/stores/usePollStore';
+  import { useFetchApi } from '../composables/useFetchApi';
 
   const { polls, deletePoll } = usePollStore();
 
   async function delPoll(id) {
     console.log('delete Poll ID:', id);
     await deletePoll(id);
+  }
+
+  const { fetchApi } = useFetchApi();
+  function fecthDelete(id) {
+    // if (!confirm('Êtes-vous sûr de vouloir supprimer ce sondage ?')) return;
+
+    fetchApi({url: `/polls/${id}`, method: 'DELETE'})
+      .then(() => {
+        alert('Sondage supprimé avec succès.');
+        delPoll(id);
+      })
+      .catch((error) => {
+        console.error('Erreur lors de la suppression du sondage:', error);
+        alert('Une erreur est survenue lors de la suppression du sondage.');
+      });
   }
 </script>
 
@@ -22,6 +38,7 @@
         <th class="border px-3 py-2">Brouillon</th>
         <th class="border px-3 py-2">Debut</th>
         <th class="border px-3 py-2">Fin</th>
+        <th class="border px-3 py-2">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -33,6 +50,7 @@
         <td class="border px-3 py-2">{{ poll.is_draft ? 'Oui' : 'Non' }}</td>
         <td class="border px-3 py-2">{{ poll.started_at || '-' }}</td>
         <td class="border px-3 py-2">{{ poll.ends_at || '-' }}</td>
+        <td class="border px-3 py-2"><button @click="fetchDdelete(poll.id)">Supprimer</button></td>
       </tr>
     </tbody>
   </table>
