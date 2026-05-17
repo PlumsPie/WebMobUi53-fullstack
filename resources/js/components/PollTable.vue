@@ -1,68 +1,82 @@
 <script setup>
-  import { usePollStore } from '@/stores/usePollStore';
-  import { useFetchApi } from '../composables/useFetchApi';
+import { ref } from 'vue';
+import { usePollStore } from '@/stores/usePollStore';
+import { useFetchApi } from '@/composables/useFetchApi';
+import PollEditModal from './PollEditForm.vue';
+import ShareLink from './PollShare.vue';
 
-  const { polls, deletePoll } = usePollStore();
+const { polls, deletePoll } = usePollStore();
+const { fetchApi } = useFetchApi();
 
-  async function delPoll(id) {
-    console.log('delete Poll ID:', id);
+const editingPoll = ref(null);  // poll en cours d'édition
+const sharingPoll = ref(null);  // poll dont on affiche le lien
+
+async function handleDelete(id) {
+  if (!confirm('Supprimer ce sondage ?')) return;
+  try {
     await deletePoll(id);
+  } catch {
+    alert('Erreur lors de la suppression.');
   }
+}
 
-  const { fetchApi } = useFetchApi();
-  function fecthDelete(id) {
-    // if (!confirm('Êtes-vous sûr de vouloir supprimer ce sondage ?')) return;
-
-    fetchApi({url: `/polls/${id}`, method: 'DELETE'})
-      .then(() => {
-        alert('Sondage supprimé avec succès.');
-        delPoll(id);
-      })
-      .catch((error) => {
-        console.error('Erreur lors de la suppression du sondage:', error);
-        alert('Une erreur est survenue lors de la suppression du sondage.');
-      });
-  }
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('fr-CH');
+}
 </script>
 
 <template>
-  <p v-if="polls.length === 0">Aucun sondage.</p>
+  <p v-if="polls.length === 0" class="text-gray-500 py-4">Aucun sondage.</p>
 
-  <table v-else class="w-full border-collapse text-left">
-    <thead>
-      <tr>
-        <th class="border px-3 py-2">Actions</th>
-        <th class="border px-3 py-2">ID</th>
-        <th class="border px-3 py-2">Titre</th>
-        <th class="border px-3 py-2">Question</th>
-        <th class="border px-3 py-2">Brouillon</th>
-        <th class="border px-3 py-2">Debut</th>
-        <th class="border px-3 py-2">Fin</th>
-        <th class="border px-3 py-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="poll in polls" :key="poll.id">
-        <td class="border px-3 py-2"><button @click="delPoll(poll.id)">Supp.</button></td>
-        <td class="border px-3 py-2">{{ poll.id }}</td>
-        <td class="border px-3 py-2">{{ poll.title || '-' }}</td>
-        <td class="border px-3 py-2">{{ poll.question }}</td>
-        <td class="border px-3 py-2">{{ poll.is_draft ? 'Oui' : 'Non' }}</td>
-        <td class="border px-3 py-2">{{ poll.started_at || '-' }}</td>
-        <td class="border px-3 py-2">{{ poll.ends_at || '-' }}</td>
-        <td class="border px-3 py-2"><button @click="fetchDdelete(poll.id)">Supprimer</button></td>
-      </tr>
-    </tbody>
-  </table>
+  <div v-else class="overflow-x-auto">
+    <table class="w-full border-collapse text-left text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border px-3 py-2">Question</th>
+          <th class="border px-3 py-2">Statut</th>
+          <th class="border px-3 py-2">Début</th>
+          <th class="border px-3 py-2">Fin</th>
+          <th class="border px-3 py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="poll in polls" :key="poll.id" class="hover:bg-gray-50">
+          <td class="border px-3 py-2">{{ poll.question }}</td>
+          <td class="border px-3 py-2">
+            <span v-if="poll.is_draft" class="text-yellow-600">Brouillon</span>
+            <span v-else-if="poll.ends_at && new Date(poll.ends_at) < new Date()" class="text-red-600">Terminé</span>
+            <span v-else class="text-green-600">Actif</span>
+          </td>
+          <td class="border px-3 py-2">{{ formatDate(poll.started_at) }}</td>
+          <td class="border px-3 py-2">{{ formatDate(poll.ends_at) }}</td>
+          <td class="border px-3 py-2 flex gap-2 flex-wrap">
+            <button @click="editingPoll = poll" class="btn-blue">Modifier</button>
+            <button @click="sharingPoll = poll" class="btn-green">Partager</button>
+            <button @click="handleDelete(poll.id)" class="btn-red">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal d'édition -->
+  <PollEditModal
+    v-if="editingPoll"
+    :poll="editingPoll"
+    @close="editingPoll = null"
+  />
+
+  <!-- Lien de partage -->
+  <ShareLink
+    v-if="sharingPoll"
+    :token="sharingPoll.secret_token"
+    @close="sharingPoll = null"
+  />
 </template>
 
-<style scoped>
-  button {
-    background-color: #e3342f;
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-  }
-</style>
+<!-- <style scoped>
+.btn-blue  { @apply bg-blue-600 text-white px-2 py-1 rounded text-xs; }
+.btn-green { @apply bg-green-600 text-white px-2 py-1 rounded text-xs; }
+.btn-red   { @apply bg-red-600 text-white px-2 py-1 rounded text-xs; }
+</style> -->
