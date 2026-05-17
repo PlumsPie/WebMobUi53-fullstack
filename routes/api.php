@@ -18,9 +18,22 @@ Route::apiResource('v1/posts', ApiPostController::class)
 
 Route::get('/v1/polls/{token}', [ApiPollController::class, 'show']);
 
+// Route publique
+Route::get('/v1/polls/{id}/results', [ApiPollController::class, 'results']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/v1/foo', [ApiFooController::class, 'show']);
     Route::post('/v1/foo', [ApiFooController::class, 'store']);
+
+    // Méthode poll
     Route::get('/v1/polls', [ApiPollController::class, 'index']);
     Route::delete('/v1/polls/{id}', [ApiPollController::class, 'remove']);
+
+    Route::post('/v1/polls', [ApiPollController::class, 'store']);
+    Route::patch('/v1/polls/{id}', [ApiPollController::class, 'update']);
+    Route::post('/v1/polls/{id}/options', [ApiPollController::class, 'storeOption']);
+    Route::delete('/v1/polls/{id}/options/{optionId}', [ApiPollController::class, 'destroyOption']);
+    Route::post('/v1/polls/{id}/votes', [ApiPollController::class, 'vote']);
+
+
 });

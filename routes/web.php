@@ -39,3 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('tokens', TokenController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
+
+// Lien partage
+Route::get('/vote/{token}', function () {
+    return view('polls.vote');
+})->name('polls.vote');

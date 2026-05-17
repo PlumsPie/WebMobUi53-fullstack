@@ -76,7 +76,7 @@ export function fetchJson(options) {
   const body = theMethod !== 'GET' && data ? JSON.stringify(data) : null;
 
   const request = new Promise((resolve, reject) => {
-    fetch(fullUrl, { method: theMethod, headers: allHeaders, body, signal })
+    fetch(fullUrl, { method: theMethod, headers: allHeaders, body, signal,credentials: 'include' })
       .then(resp => {
         clearTimeout(timeoutId);
         const respClone = resp.clone();
