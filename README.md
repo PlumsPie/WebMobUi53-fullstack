@@ -68,10 +68,17 @@ Pour développer et tester le mini-projet en local, voici les étapes à suivre 
     php artisan db:seed
     ```
 
-9. Démarrer le serveur de développement Laravel :
+9. Pour visualiser le résultat des votes:
+    ```bash
+    npm install chart.js
+    ```
+    
+10. Démarrer le serveur de développement Laravel :
 
     ```bash
     composer run dev
     ```
+
+
 
 L'application sera accessible à l'adresse <http://localhost:8000>.
