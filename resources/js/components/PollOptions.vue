@@ -8,34 +8,32 @@ const { fetchApi } = useFetchApi();
 const newLabel = ref('');
 const errorMsg = ref('');
 
-// On travaille directement sur le tableau d'options de la prop
-// (la prop poll est un objet réactif du store, donc la mutation se propage)
-const options = props.poll.options ?? [];
+// Ref réactive initialisée avec les options existantes
+const options = ref([...(props.poll.options ?? [])]);
 
 async function addOption() {
   errorMsg.value = '';
   if (!newLabel.value.trim()) return;
-
   try {
     const option = await fetchApi({
       url: `/polls/${props.poll.id}/options`,
       data: { label: newLabel.value.trim() },
     });
-    options.push(option);
+    options.value.push(option);
     newLabel.value = '';
   } catch {
-    errorMsg.value = 'Erreur lors de l\'ajout.';
+    errorMsg.value = "Erreur lors de l'ajout.";
   }
 }
 
 async function removeOption(optionId) {
+  // Suppression optimiste : retirer immédiatement de l'UI
+  options.value = options.value.filter(o => o.id !== optionId);
   try {
     await fetchApi({
       url: `/polls/${props.poll.id}/options/${optionId}`,
       method: 'DELETE',
     });
-    const i = options.findIndex(o => o.id === optionId);
-    if (i !== -1) options.splice(i, 1);
   } catch {
     errorMsg.value = 'Erreur lors de la suppression.';
   }

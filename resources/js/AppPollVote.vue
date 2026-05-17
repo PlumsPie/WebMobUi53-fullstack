@@ -15,6 +15,8 @@ const results = ref([]);
 const errorMsg = ref('');
 const hasVoted = ref(false);
 const loading  = ref(true);
+const isAuthenticated = ref(!!document.getElementById('app-vote')?.dataset.token);
+const loginUrl = '/auth/login';
 
 const isExpired = computed(() => {
   if (!poll.value?.ends_at) return false;
@@ -22,7 +24,7 @@ const isExpired = computed(() => {
 });
 
 const canVote = computed(() =>
-  poll.value && !poll.value.is_draft && !isExpired.value && !hasVoted.value
+  poll.value && !poll.value.is_draft && !isExpired.value && !hasVoted.value && isAuthenticated.value
 );
 
 async function loadResults() {
@@ -36,11 +38,16 @@ async function loadResults() {
 
 onMounted(async () => {
   try {
+    // Injecter le Bearer token si présent dans l'URL ou le localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const apiToken = urlParams.get('token');
+    if (apiToken) {
+      setDefaultHeaders({ 'Authorization': `Bearer ${apiToken}` });
+    }
+
     poll.value = await fetchApi({ url: `/polls/${token}` });
     await loadResults();
-    // Polling toutes les 5 secondes
-    const { start } = usePolling(loadResults, 5000);
-    start();
+    setInterval(loadResults, 5000);
   } catch {
     errorMsg.value = 'Sondage introuvable ou lien invalide.';
   } finally {
@@ -71,6 +78,11 @@ onMounted(async () => {
       <div v-else-if="poll.is_draft" class="bg-yellow-50 border border-yellow-200 text-yellow-700 p-3 rounded mb-4">
         🟡 Ce sondage n'est pas encore lancé.
       </div>
+      <!-- Pas connecté -->
+    <div v-if="!isAuthenticated && poll && !poll.is_draft && !isExpired"
+    class="bg-blue-50 border border-blue-200 text-blue-700 p-3 rounded mb-4">
+    <a :href="loginUrl" class="underline font-medium">Connectez-vous</a> pour voter.
+    </div>
 
       <!-- Formulaire de vote -->
       <VoteForm

@@ -7,5 +7,5 @@
         Voter
     </x-slot>
 
-    <div id="app-vote"></div>
+    <div id="app-vote" data-token="{{ $apiToken ?? '' }}"></div>
 </x-vue-app-layout>

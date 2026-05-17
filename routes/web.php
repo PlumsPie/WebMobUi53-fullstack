@@ -8,6 +8,8 @@ use App\Http\Controllers\PollDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TokenController;
 use App\Models\Post;
+use App\Models\Poll;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -42,5 +44,10 @@ Route::middleware('auth')->group(function () {
 
 // Lien partage
 Route::get('/vote/{token}', function () {
-    return view('polls.vote');
+    $apiToken = null;
+    if (auth()->check()) {
+        auth()->user()->tokens()->where('name', 'spa-token')->delete();
+        $apiToken = auth()->user()->createToken('spa-token')->plainTextToken;
+    }
+    return view('polls.vote', ['apiToken' => $apiToken]);
 })->name('polls.vote');
