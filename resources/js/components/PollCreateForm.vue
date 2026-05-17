@@ -11,7 +11,7 @@ const form = ref({
   question:       '',
   title:          '',
   is_draft:       true,
-  allow_multiple: false,
+  allow_multiple_choices: false,
   results_public: true,
   ends_at:        '',
 });

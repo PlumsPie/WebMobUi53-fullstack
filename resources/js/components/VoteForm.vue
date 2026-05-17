@@ -17,7 +17,7 @@ const loading  = ref(false);
 async function submit() {
   errorMsg.value = '';
 
-  const optionIds = props.poll.allow_multiple
+  const optionIds = props.poll.allow_multiple_choices
     ? selectedIds.value
     : (singleId.value ? [singleId.value] : []);
 
@@ -48,7 +48,7 @@ async function submit() {
     <h2 class="font-semibold mb-3">Votre choix</h2>
 
     <!-- Choix multiple -->
-    <div v-if="poll.allow_multiple" class="space-y-2">
+    <div v-if="poll.allow_multiple_choices" class="space-y-2">
       <label v-for="opt in poll.options" :key="opt.id"
         class="flex items-center gap-3 cursor-pointer">
         <input type="checkbox" :value="opt.id" v-model="selectedIds"

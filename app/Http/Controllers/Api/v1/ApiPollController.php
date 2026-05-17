@@ -57,7 +57,7 @@ class ApiPollController extends Controller
             'question' => 'required|string|max:255',
             'title' => 'nullable|string|max:255',
             'is_draft' => 'boolean',
-            'allow_multiple' => 'boolean',
+            'allow_multiple_choices' => 'boolean',
             'results_public' => 'boolean',
             'ends_at' => 'nullable|date|after:now',
         ]);
@@ -82,7 +82,7 @@ class ApiPollController extends Controller
             'question' => 'sometimes|string|max:255',
             'title' => 'nullable|string|max:255',
             'is_draft' => 'boolean',
-            'allow_multiple' => 'boolean',
+            'allow_multiple_choices' => 'boolean',
             'results_public' => 'boolean',
             'ends_at' => 'nullable|date',
             'started_at' => 'nullable|date',
@@ -143,7 +143,7 @@ class ApiPollController extends Controller
         ]);
 
         // Choix unique : refuser si plusieurs options envoyées
-        if (! $poll->allow_multiple && count($data['option_ids']) > 1) {
+        if (! $poll->allow_multiple_choices && count($data['option_ids']) > 1) {
             return response()->json(['message' => 'Only one choice allowed.'], 422);
         }
 
@@ -162,7 +162,7 @@ class ApiPollController extends Controller
             if (! $pollOptionIds->contains($optionId)) {
                 continue;
             }
-            PollVote::create(['user_id' => $request->user()->id, 'poll_option_id' => $optionId]);
+            PollVote::create(['user_id' => $request->user()->id, 'poll_option_id' => $optionId, 'poll_id'=> $poll->id,]);
         }
 
         return response()->json(['message' => 'Vote recorded.'], 201);

@@ -2,14 +2,18 @@
 import { usePollStore } from '@/stores/usePollStore';
 import PollTable from './components/PollTable.vue';
 import PollCreateForm from './components/PollCreateForm.vue';
+import { setDefaultHeaders } from '@/composables/useFetchApi';
 import { ref } from 'vue';
 
 const props = defineProps({
   polls:    { type: Array,  default: () => [] },
   loginUrl: { type: String, default: null },
   username: { type: String, default: null },
+  apiToken: { type: String, default: null },
 });
-
+if (props.apiToken) {
+  setDefaultHeaders({ 'Authorization': `Bearer ${props.apiToken}` });
+}
 const { setPolls } = usePollStore();
 setPolls(props.polls);
 

@@ -61,7 +61,7 @@ async function save() {
           Brouillon
         </label>
         <label class="flex items-center gap-2 text-sm">
-          <input type="checkbox" v-model="form.allow_multiple" />
+          <input type="checkbox" v-model="form.allow_multiple_choices" />
           Choix multiple
         </label>
         <label class="flex items-center gap-2 text-sm">
